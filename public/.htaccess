@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Servir imagenes desde uploads/
+RewriteRule ^uploads/(.+)$ uploads.php?f=$1 [QSA,L]
+
 # Redirigir todo a index.php excepto archivos existentes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
