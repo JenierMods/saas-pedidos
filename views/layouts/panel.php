@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= sanitize($titulo ?? 'Panel') ?> - <?= sanitize(APP_NAME) ?></title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=2">
 </head>
 <body class="panel-body">
     <div class="panel-wrapper">
@@ -54,6 +54,6 @@
         </main>
     </div>
 
-    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/app.js?v=2"></script>
 </body>
 </html>
