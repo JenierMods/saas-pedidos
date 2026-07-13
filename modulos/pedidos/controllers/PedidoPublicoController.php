@@ -13,6 +13,12 @@ class PedidoPublicoController {
             return;
         }
 
+        if (!tieneModulo($negocio['id'], 'pedidos')) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Pedidos no disponible']);
+            return;
+        }
+
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
             http_response_code(400);
@@ -20,16 +26,26 @@ class PedidoPublicoController {
             return;
         }
 
-        $nombre = trim($input['cliente_nombre'] ?? '');
-        $telefono = trim($input['cliente_telefono'] ?? '');
+        $errores = validar($input, [
+            'cliente_nombre' => 'required|min:2|max:100',
+            'cliente_telefono' => 'required|min:8|max:20',
+        ]);
+        if (!empty($errores)) {
+            http_response_code(400);
+            echo json_encode(['error' => array_values($errores)[0]]);
+            return;
+        }
+
+        $nombre = trim($input['cliente_nombre']);
+        $telefono = trim($input['cliente_telefono']);
         $direccion = trim($input['cliente_direccion'] ?? '');
         $nota = trim($input['nota'] ?? '');
         $metodo = $input['metodo_entrega'] ?? 'delivery';
         $items = $input['items'] ?? [];
 
-        if (!$nombre || !$telefono || empty($items)) {
+        if (empty($items)) {
             http_response_code(400);
-            echo json_encode(['error' => 'Nombre, telefono y al menos un producto son obligatorios']);
+            echo json_encode(['error' => 'Al menos un producto es obligatorio']);
             return;
         }
 
@@ -80,7 +96,8 @@ class PedidoPublicoController {
 
             $db->commit();
 
-            $mensaje = $this->generarMensajeWhatsApp($negocio, $pedidoId, $nombre, $telefono, $direccion, $nota, $metodo, $itemsValidados, $total);
+            $pedido = $pedidoModel->porId($pedidoId, $negocio['id']);
+            $mensaje = $this->generarMensajeWhatsApp($negocio, $pedido['numero'], $nombre, $telefono, $direccion, $nota, $metodo, $itemsValidados, $total);
             $waUrl = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $negocio['telefono']) . '?text=' . urlencode($mensaje);
 
             header('Content-Type: application/json');
@@ -93,10 +110,10 @@ class PedidoPublicoController {
         }
     }
 
-    private function generarMensajeWhatsApp($negocio, $pedidoId, $nombre, $telefono, $direccion, $nota, $metodo, $items, $total) {
+    private function generarMensajeWhatsApp($negocio, $numero, $nombre, $telefono, $direccion, $nota, $metodo, $items, $total) {
         $moneda = $negocio['moneda'] ?? 'C$';
         $lineas = [];
-        $lineas[] = "--- NUEVO PEDIDO #{$pedidoId} ---";
+        $lineas[] = "--- NUEVO PEDIDO #{$numero} ---";
         $lineas[] = "";
         $lineas[] = "Cliente: {$nombre}";
         $lineas[] = "Telefono: {$telefono}";

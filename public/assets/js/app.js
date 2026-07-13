@@ -28,6 +28,12 @@ function copiarEnlace() {
     });
 }
 
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+}
+
 // ===== CARRITO =====
 var carrito = JSON.parse(localStorage.getItem('carrito_' + (window.carritoSlug || '')) || '[]');
 
@@ -121,7 +127,7 @@ function actualizarUI() {
                 var item = carrito[j];
                 var sub = (item.precio * item.cantidad).toFixed(2);
                 html += '<div class="carrito-item">';
-                html += '<span class="carrito-item-nombre">' + item.nombre + '</span>';
+                html += '<span class="carrito-item-nombre">' + escapeHtml(item.nombre) + '</span>';
                 html += '<div class="carrito-item-qty">';
                 html += '<button onclick="cambiarCantidad(' + item.id + ', -1)">-</button>';
                 html += '<span>' + item.cantidad + '</span>';
@@ -174,9 +180,15 @@ if (pedidoForm) {
         btn.disabled = true;
         btn.textContent = 'Enviando...';
 
+        var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
         fetch('/tienda/' + window.carritoSlug + '/pedido', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
             body: JSON.stringify(data)
         })
         .then(function(res) { return res.json(); })

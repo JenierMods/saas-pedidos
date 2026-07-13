@@ -35,7 +35,7 @@
                     <strong><?= sanitize($p['cliente_nombre']) ?></strong><br>
                     <small><?= sanitize($p['cliente_telefono']) ?></small>
                 </td>
-                <td><?= $user['moneda'] ?? 'C$' ?> <?= number_format($p['total'], 2) ?></td>
+                <td><?= sanitize($user['moneda'] ?? 'C$') ?> <?= number_format($p['total'], 2) ?></td>
                 <td><span class="badge badge-<?= $p['estado'] ?>"><?= ucfirst($p['estado']) ?></span></td>
                 <td><?= $p['metodo_entrega'] === 'delivery' ? 'Delivery' : 'Recoger' ?></td>
                 <td><?= date('d/m/Y H:i', strtotime($p['created_at'])) ?></td>

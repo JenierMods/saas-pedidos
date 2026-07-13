@@ -12,9 +12,18 @@ function csrfField() {
 }
 
 function verificarCsrf() {
-    $token = $_POST['_csrf'] ?? '';
+    $token = $_POST['_csrf']
+        ?? $_SERVER['HTTP_X_CSRF_TOKEN']
+        ?? '';
     if (!hash_equals(csrf(), $token)) {
         http_response_code(403);
-        die('Token de seguridad invalido. Recarga la pagina.');
+        $esJson = strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false;
+        if ($esJson) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Token de seguridad invalido']);
+        } else {
+            echo 'Token de seguridad invalido. Recarga la pagina.';
+        }
+        exit;
     }
 }

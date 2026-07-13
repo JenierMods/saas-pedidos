@@ -24,7 +24,6 @@
             <form method="POST" action="/panel/pedidos/<?= $pedido['id'] ?>/estado" class="estado-form">
                 <?= csrfField() ?>
                 <select name="estado">
-                    <option value="nuevo" <?= $pedido['estado'] === 'nuevo' ? 'selected' : '' ?>>Nuevo</option>
                     <option value="preparando" <?= $pedido['estado'] === 'preparando' ? 'selected' : '' ?>>Preparando</option>
                     <option value="listo" <?= $pedido['estado'] === 'listo' ? 'selected' : '' ?>>Listo</option>
                     <option value="entregado" <?= $pedido['estado'] === 'entregado' ? 'selected' : '' ?>>Entregado</option>

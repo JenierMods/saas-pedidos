@@ -1,17 +1,21 @@
 <?php
 
 $ruta = $_GET['f'] ?? '';
-$ruta = str_replace(['..', "\0"], '', $ruta);
 
 if (!$ruta) {
     http_response_code(404);
     exit;
 }
 
-$archivo = dirname(__DIR__) . '/uploads/' . $ruta;
-
-if (!is_file($archivo)) {
+$uploadsDir = realpath(dirname(__DIR__) . '/uploads');
+if ($uploadsDir === false) {
     http_response_code(404);
+    exit;
+}
+
+$archivo = realpath($uploadsDir . '/' . $ruta);
+if ($archivo === false || strpos($archivo, $uploadsDir . DIRECTORY_SEPARATOR) !== 0) {
+    http_response_code(403);
     exit;
 }
 

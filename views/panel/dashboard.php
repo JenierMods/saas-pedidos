@@ -10,7 +10,7 @@
         <span class="stat-label">Pedidos hoy</span>
     </div>
     <div class="stat-card">
-        <span class="stat-numero"><?= $user['moneda'] ?? 'C$' ?> <?= number_format($stats['ventas_hoy'], 2) ?></span>
+        <span class="stat-numero"><?= sanitize($user['moneda'] ?? 'C$') ?> <?= number_format($stats['ventas_hoy'], 2) ?></span>
         <span class="stat-label">Ventas hoy</span>
     </div>
     <div class="stat-card">

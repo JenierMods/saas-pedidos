@@ -86,7 +86,7 @@ class Pedido {
     }
 
     public function cambiarEstado($id, $negocio_id, $estado) {
-        $validos = ['nuevo', 'preparando', 'listo', 'entregado', 'cancelado'];
+        $validos = ['preparando', 'listo', 'entregado', 'cancelado'];
         if (!in_array($estado, $validos)) return false;
 
         $stmt = $this->db->prepare("UPDATE pedidos SET estado = ? WHERE id = ? AND negocio_id = ?");
