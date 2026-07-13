@@ -36,4 +36,36 @@ class CatalogoPublicoController {
             'tienePedidos' => $tienePedidos,
         ]);
     }
+
+    public function detalle($slug, $id) {
+        $negocio = (new Negocio())->porSlug($slug);
+        if (!$negocio) {
+            http_response_code(404);
+            require BASE_PATH . '/views/landing/404.php';
+            return;
+        }
+
+        $productoModel = new Producto();
+        $producto = $productoModel->porIdPublico((int) $id, $negocio['id']);
+        if (!$producto) {
+            http_response_code(404);
+            require BASE_PATH . '/views/landing/404.php';
+            return;
+        }
+
+        $relacionados = $productoModel->relacionados(
+            $negocio['id'],
+            $producto['categoria_id'],
+            $producto['id']
+        );
+
+        $tienePedidos = tieneModulo($negocio['id'], 'pedidos');
+
+        renderPublico('catalogo', 'publico/producto-detalle', [
+            'negocio' => $negocio,
+            'producto' => $producto,
+            'relacionados' => $relacionados,
+            'tienePedidos' => $tienePedidos,
+        ]);
+    }
 }

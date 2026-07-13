@@ -13,3 +13,4 @@ post('/panel/categorias/guardar', ['CategoriaController', 'guardar']);
 post('/panel/categorias/eliminar/{id}', ['CategoriaController', 'eliminar']);
 
 get('/tienda/{slug}', ['CatalogoPublicoController', 'show']);
+get('/tienda/{slug}/producto/{id}', ['CatalogoPublicoController', 'detalle']);

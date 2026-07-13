@@ -402,7 +402,137 @@ img { max-width: 100%; height: auto; }
 .producto-info h3 { font-size: 15px; margin-bottom: 4px; }
 .producto-desc { font-size: 13px; color: var(--gray-500); margin-bottom: 8px; }
 .producto-precio { font-weight: 700; color: var(--primary); font-size: 16px; display: block; margin-bottom: 8px; }
+.producto-card-link { display: block; text-decoration: none; color: inherit; }
+.producto-card-link:hover { text-decoration: none; }
+.producto-actions { padding: 0 12px 12px; }
 .btn-agregar { width: 100%; }
+
+/* Breadcrumb */
+.producto-breadcrumb { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; }
+.producto-breadcrumb a { color: var(--primary); }
+.breadcrumb-sep { margin: 0 6px; }
+
+/* Detalle de producto */
+.producto-detalle-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.producto-detalle-imagen { position: relative; }
+.producto-detalle-img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    display: block;
+}
+.producto-detalle-img-placeholder {
+    width: 100%;
+    height: 300px;
+    background: var(--gray-200);
+}
+.producto-detalle-info { padding: 24px; }
+.producto-detalle-categoria {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+.producto-detalle-nombre {
+    font-size: 24px;
+    line-height: 1.3;
+    margin-bottom: 12px;
+    color: var(--gray-900);
+}
+.producto-detalle-precio {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+.producto-detalle-descripcion {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--gray-700);
+    margin-bottom: 24px;
+    white-space: pre-line;
+}
+.producto-detalle-comprar { margin-top: 8px; }
+
+.cantidad-selector {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 16px;
+    width: fit-content;
+}
+.cantidad-selector button {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--gray-300);
+    background: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.cantidad-selector button:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.cantidad-selector button:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+.cantidad-selector button:hover { background: var(--gray-100); }
+.cantidad-selector span {
+    width: 48px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    border-top: 1px solid var(--gray-300);
+    border-bottom: 1px solid var(--gray-300);
+    background: var(--gray-50);
+}
+
+.btn-agregado {
+    background: var(--success) !important;
+}
+
+/* Productos relacionados */
+.productos-relacionados { margin-top: 40px; }
+.productos-relacionados h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: var(--gray-900);
+}
+
+/* Carrito vacio */
+.carrito-vacio {
+    text-align: center;
+    color: var(--gray-500);
+    padding: 24px 0;
+    font-size: 14px;
+}
+
+/* Carrito item mejorado */
+.carrito-item-eliminar {
+    background: none;
+    border: none;
+    color: var(--gray-500);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 0 0 8px;
+    line-height: 1;
+}
+.carrito-item-eliminar:hover { color: var(--danger); }
 
 /* Carrito */
 .carrito-flotante {
@@ -508,4 +638,18 @@ img { max-width: 100%; height: auto; }
     .producto-img { height: 140px; }
 
     .carrito-panel { max-width: 100%; }
+
+    .producto-detalle-nombre { font-size: 20px; }
+    .producto-detalle-precio { font-size: 24px; }
+    .producto-detalle-info { padding: 16px; }
+}
+
+@media (min-width: 600px) {
+    .producto-detalle-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .producto-detalle-img {
+        height: 100%;
+        min-height: 350px;
+    }
 }

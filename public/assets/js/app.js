@@ -36,17 +36,36 @@ function guardarCarrito() {
     actualizarUI();
 }
 
-function agregarAlCarrito(id, nombre, precio) {
+function agregarAlCarrito(id, nombre, precio, cantidad) {
+    cantidad = cantidad || 1;
     var existente = null;
     for (var i = 0; i < carrito.length; i++) {
         if (carrito[i].id === id) { existente = carrito[i]; break; }
     }
     if (existente) {
-        existente.cantidad++;
+        existente.cantidad += cantidad;
     } else {
-        carrito.push({ id: id, nombre: nombre, precio: precio, cantidad: 1 });
+        carrito.push({ id: id, nombre: nombre, precio: precio, cantidad: cantidad });
     }
     guardarCarrito();
+
+    var botones = document.querySelectorAll('.btn-agregar');
+    for (var j = 0; j < botones.length; j++) {
+        var onclick = botones[j].getAttribute('onclick');
+        if (onclick && onclick.indexOf('agregarAlCarrito(' + id + ',') !== -1) {
+            mostrarFeedback(botones[j]);
+        }
+    }
+}
+
+function mostrarFeedback(btn) {
+    var textoOriginal = btn.textContent;
+    btn.textContent = 'Agregado';
+    btn.classList.add('btn-agregado');
+    setTimeout(function() {
+        btn.textContent = textoOriginal;
+        btn.classList.remove('btn-agregado');
+    }, 1500);
 }
 
 function cambiarCantidad(id, delta) {
@@ -62,11 +81,22 @@ function cambiarCantidad(id, delta) {
     guardarCarrito();
 }
 
+function eliminarDelCarrito(id) {
+    for (var i = 0; i < carrito.length; i++) {
+        if (carrito[i].id === id) {
+            carrito.splice(i, 1);
+            break;
+        }
+    }
+    guardarCarrito();
+}
+
 function actualizarUI() {
     var flotante = document.getElementById('carrito-flotante');
     var countEl = document.getElementById('carrito-count');
     var itemsEl = document.getElementById('carrito-items');
     var totalEl = document.getElementById('carrito-total');
+    var totalBtnEl = document.getElementById('carrito-total-btn');
 
     if (!flotante) return;
 
@@ -80,23 +110,29 @@ function actualizarUI() {
 
     flotante.style.display = totalItems > 0 ? 'block' : 'none';
     if (countEl) countEl.textContent = totalItems;
+    if (totalBtnEl) totalBtnEl.textContent = (window.carritoMoneda || 'C$') + ' ' + totalPrecio.toFixed(2);
 
     if (itemsEl) {
-        var html = '';
-        for (var j = 0; j < carrito.length; j++) {
-            var item = carrito[j];
-            var sub = (item.precio * item.cantidad).toFixed(2);
-            html += '<div class="carrito-item">';
-            html += '<span class="carrito-item-nombre">' + item.nombre + '</span>';
-            html += '<div class="carrito-item-qty">';
-            html += '<button onclick="cambiarCantidad(' + item.id + ', -1)">-</button>';
-            html += '<span>' + item.cantidad + '</span>';
-            html += '<button onclick="cambiarCantidad(' + item.id + ', 1)">+</button>';
-            html += '</div>';
-            html += '<span>' + (window.carritoMoneda || 'C$') + ' ' + sub + '</span>';
-            html += '</div>';
+        if (carrito.length === 0) {
+            itemsEl.innerHTML = '<p class="carrito-vacio">Tu carrito esta vacio. Agrega productos para hacer tu pedido.</p>';
+        } else {
+            var html = '';
+            for (var j = 0; j < carrito.length; j++) {
+                var item = carrito[j];
+                var sub = (item.precio * item.cantidad).toFixed(2);
+                html += '<div class="carrito-item">';
+                html += '<span class="carrito-item-nombre">' + item.nombre + '</span>';
+                html += '<div class="carrito-item-qty">';
+                html += '<button onclick="cambiarCantidad(' + item.id + ', -1)">-</button>';
+                html += '<span>' + item.cantidad + '</span>';
+                html += '<button onclick="cambiarCantidad(' + item.id + ', 1)">+</button>';
+                html += '</div>';
+                html += '<span>' + (window.carritoMoneda || 'C$') + ' ' + sub + '</span>';
+                html += '<button class="carrito-item-eliminar" onclick="eliminarDelCarrito(' + item.id + ')" title="Eliminar">&times;</button>';
+                html += '</div>';
+            }
+            itemsEl.innerHTML = html;
         }
-        itemsEl.innerHTML = html;
     }
 
     if (totalEl) {

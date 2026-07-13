@@ -80,6 +80,42 @@ class Producto {
         return $stmt->execute([$id, $negocio_id]);
     }
 
+    public function porIdPublico($id, $negocio_id) {
+        $stmt = $this->db->prepare("
+            SELECT p.*, c.nombre as categoria_nombre
+            FROM productos p
+            LEFT JOIN categorias_catalogo c ON p.categoria_id = c.id
+            WHERE p.id = ? AND p.negocio_id = ? AND p.disponible = 1
+        ");
+        $stmt->execute([$id, $negocio_id]);
+        return $stmt->fetch();
+    }
+
+    public function relacionados($negocio_id, $categoria_id, $excluir_id, $limit = 4) {
+        if ($categoria_id) {
+            $stmt = $this->db->prepare("
+                SELECT p.*, c.nombre as categoria_nombre
+                FROM productos p
+                LEFT JOIN categorias_catalogo c ON p.categoria_id = c.id
+                WHERE p.negocio_id = ? AND p.disponible = 1 AND p.categoria_id = ? AND p.id != ?
+                ORDER BY RAND()
+                LIMIT ?
+            ");
+            $stmt->execute([$negocio_id, $categoria_id, $excluir_id, $limit]);
+        } else {
+            $stmt = $this->db->prepare("
+                SELECT p.*, c.nombre as categoria_nombre
+                FROM productos p
+                LEFT JOIN categorias_catalogo c ON p.categoria_id = c.id
+                WHERE p.negocio_id = ? AND p.disponible = 1 AND p.id != ?
+                ORDER BY RAND()
+                LIMIT ?
+            ");
+            $stmt->execute([$negocio_id, $excluir_id, $limit]);
+        }
+        return $stmt->fetchAll();
+    }
+
     public function publicosPorNegocio($negocio_id) {
         $stmt = $this->db->prepare("
             SELECT p.*, c.nombre as categoria_nombre
