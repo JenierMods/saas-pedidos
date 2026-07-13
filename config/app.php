@@ -21,7 +21,7 @@ define('APP_NAME', env('APP_NAME', 'MiNegocioApp'));
 define('APP_URL', env('APP_URL', 'http://localhost'));
 define('APP_DEBUG', env('APP_DEBUG', 'false') === 'true');
 define('BASE_PATH', dirname(__DIR__));
-define('UPLOAD_MAX_SIZE', (int) env('UPLOAD_MAX_SIZE', 5242880));
+define('UPLOAD_MAX_SIZE', (int) env('UPLOAD_MAX_SIZE', 10485760));
 define('UPLOAD_DIR', BASE_PATH . '/' . env('UPLOAD_DIR', 'uploads'));
 
 date_default_timezone_set('America/Managua');

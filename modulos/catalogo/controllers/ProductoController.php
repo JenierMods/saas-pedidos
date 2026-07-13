@@ -2,6 +2,7 @@
 
 require_once BASE_PATH . '/modulos/catalogo/models/Producto.php';
 require_once BASE_PATH . '/modulos/catalogo/models/Categoria.php';
+require_once BASE_PATH . '/modulos/catalogo/models/ProductoImagen.php';
 
 class ProductoController {
 
@@ -48,6 +49,7 @@ class ProductoController {
             renderModulo('catalogo', 'panel/producto-form', [
                 'categorias' => $categorias,
                 'producto' => null,
+                'imagenes' => [],
                 'errores' => $errores,
                 'old' => $_POST,
                 'user' => currentUser(),
@@ -55,31 +57,39 @@ class ProductoController {
             return;
         }
 
-        $imagen = null;
-        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-            $resultado = subirImagen('imagen', 'productos');
+        $rutas = [];
+        if (isset($_FILES['imagenes']) && is_array($_FILES['imagenes']['name'])) {
+            $resultado = subirMultiplesImagenes('imagenes', 'productos', 5);
             if (isset($resultado['error'])) {
                 $categorias = (new Categoria())->porNegocio($negocio_id);
                 renderModulo('catalogo', 'panel/producto-form', [
                     'categorias' => $categorias,
                     'producto' => null,
-                    'errores' => ['imagen' => $resultado['error']],
+                    'imagenes' => [],
+                    'errores' => ['imagenes' => $resultado['error']],
                     'old' => $_POST,
                     'user' => currentUser(),
                 ]);
                 return;
             }
-            $imagen = $resultado['ruta'];
+            $rutas = $resultado;
         }
 
-        (new Producto())->crear([
+        $imagenPrincipal = !empty($rutas) ? $rutas[0] : null;
+
+        $productoId = (new Producto())->crear([
             'negocio_id' => $negocio_id,
             'categoria_id' => intval($_POST['categoria_id'] ?? 0) ?: null,
             'nombre' => trim($_POST['nombre']),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
             'precio' => floatval($_POST['precio']),
-            'imagen' => $imagen,
+            'imagen' => $imagenPrincipal,
         ]);
+
+        $imagenModel = new ProductoImagen();
+        foreach ($rutas as $orden => $ruta) {
+            $imagenModel->agregar($productoId, $ruta, $orden);
+        }
 
         setFlash('exito', 'Producto creado');
         redirect('/panel/productos');
@@ -87,13 +97,16 @@ class ProductoController {
 
     public function editar($id) {
         requireLogin();
-        $producto = (new Producto())->porId($id, negocioId());
+        $negocio_id = negocioId();
+        $producto = (new Producto())->porId($id, $negocio_id);
         if (!$producto) redirect('/panel/productos');
 
-        $categorias = (new Categoria())->porNegocio(negocioId());
+        $categorias = (new Categoria())->porNegocio($negocio_id);
+        $imagenes = (new ProductoImagen())->porProducto($id);
         renderModulo('catalogo', 'panel/producto-form', [
             'categorias' => $categorias,
             'producto' => $producto,
+            'imagenes' => $imagenes,
             'user' => currentUser(),
         ]);
     }
@@ -102,6 +115,7 @@ class ProductoController {
         requireLogin();
         $negocio_id = negocioId();
         $productoModel = new Producto();
+        $imagenModel = new ProductoImagen();
         $producto = $productoModel->porId($id, $negocio_id);
         if (!$producto) redirect('/panel/productos');
 
@@ -110,11 +124,14 @@ class ProductoController {
             'precio' => 'required|numeric',
         ]);
 
+        $imagenesExistentes = $imagenModel->porProducto($id);
+
         if ($errores) {
             $categorias = (new Categoria())->porNegocio($negocio_id);
             renderModulo('catalogo', 'panel/producto-form', [
                 'categorias' => $categorias,
                 'producto' => $producto,
+                'imagenes' => $imagenesExistentes,
                 'errores' => $errores,
                 'old' => $_POST,
                 'user' => currentUser(),
@@ -129,21 +146,51 @@ class ProductoController {
             'precio' => floatval($_POST['precio']),
         ];
 
-        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-            $resultado = subirImagen('imagen', 'productos');
-            if (isset($resultado['error'])) {
+        $cantidadExistente = count($imagenesExistentes);
+
+        if (isset($_FILES['imagenes']) && is_array($_FILES['imagenes']['name'])) {
+            $nuevas = 0;
+            foreach ($_FILES['imagenes']['error'] as $err) {
+                if ($err === UPLOAD_ERR_OK) $nuevas++;
+            }
+
+            if (($cantidadExistente + $nuevas) > 5) {
                 $categorias = (new Categoria())->porNegocio($negocio_id);
                 renderModulo('catalogo', 'panel/producto-form', [
                     'categorias' => $categorias,
                     'producto' => $producto,
-                    'errores' => ['imagen' => $resultado['error']],
+                    'imagenes' => $imagenesExistentes,
+                    'errores' => ['imagenes' => 'El producto ya tiene ' . $cantidadExistente . ' imagenes. Solo puedes agregar ' . (5 - $cantidadExistente) . ' mas.'],
                     'old' => $_POST,
                     'user' => currentUser(),
                 ]);
                 return;
             }
-            if ($producto['imagen']) borrarImagen($producto['imagen']);
-            $data['imagen'] = $resultado['ruta'];
+
+            if ($nuevas > 0) {
+                $resultado = subirMultiplesImagenes('imagenes', 'productos', 5);
+                if (isset($resultado['error'])) {
+                    $categorias = (new Categoria())->porNegocio($negocio_id);
+                    renderModulo('catalogo', 'panel/producto-form', [
+                        'categorias' => $categorias,
+                        'producto' => $producto,
+                        'imagenes' => $imagenesExistentes,
+                        'errores' => ['imagenes' => $resultado['error']],
+                        'old' => $_POST,
+                        'user' => currentUser(),
+                    ]);
+                    return;
+                }
+
+                $orden = $cantidadExistente;
+                foreach ($resultado as $ruta) {
+                    $imagenModel->agregar($id, $ruta, $orden++);
+                }
+
+                if ($cantidadExistente === 0) {
+                    $data['imagen'] = $resultado[0];
+                }
+            }
         }
 
         $productoModel->actualizar($id, $negocio_id, $data);
@@ -153,9 +200,31 @@ class ProductoController {
 
     public function eliminar($id) {
         requireLogin();
-        (new Producto())->eliminar($id, negocioId());
+        $negocio_id = negocioId();
+        (new ProductoImagen())->eliminarTodasDeProducto($id);
+        (new Producto())->eliminar($id, $negocio_id);
         setFlash('exito', 'Producto eliminado');
         redirect('/panel/productos');
+    }
+
+    public function eliminarImagen($id) {
+        requireLogin();
+        $negocio_id = negocioId();
+        $productoId = intval($_POST['producto_id'] ?? 0);
+
+        $productoModel = new Producto();
+        $producto = $productoModel->porId($productoId, $negocio_id);
+        if (!$producto) redirect('/panel/productos');
+
+        $imagenModel = new ProductoImagen();
+        $imagenModel->eliminar($id, $productoId);
+
+        $restantes = $imagenModel->porProducto($productoId);
+        $nuevaPrincipal = !empty($restantes) ? $restantes[0]['imagen'] : null;
+        $productoModel->actualizar($productoId, $negocio_id, ['imagen' => $nuevaPrincipal]);
+
+        setFlash('exito', 'Imagen eliminada');
+        redirect('/panel/productos/editar/' . $productoId);
     }
 
     public function toggleDisponibilidad($id) {

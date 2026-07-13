@@ -1,4 +1,7 @@
-<?php $moneda = $negocio['moneda'] ?? 'C$'; ?>
+<?php
+$moneda = $negocio['moneda'] ?? 'C$';
+$imagenes = $imagenes ?? [];
+?>
 
 <nav class="producto-breadcrumb">
     <a href="/tienda/<?= sanitize($negocio['slug']) ?>">Catalogo</a>
@@ -12,7 +15,20 @@
 
 <div class="producto-detalle-grid">
     <div class="producto-detalle-imagen">
-        <?php if ($producto['imagen']): ?>
+        <?php if (!empty($imagenes)): ?>
+        <div class="galeria-principal">
+            <img src="/uploads/<?= sanitize($imagenes[0]['imagen']) ?>" alt="<?= sanitize($producto['nombre']) ?>" class="producto-detalle-img" id="galeria-img-principal">
+        </div>
+        <?php if (count($imagenes) > 1): ?>
+        <div class="galeria-miniaturas">
+            <?php foreach ($imagenes as $i => $img): ?>
+            <button type="button" class="galeria-thumb <?= $i === 0 ? 'active' : '' ?>" onclick="cambiarImagenGaleria(this, '/uploads/<?= sanitize($img['imagen']) ?>')">
+                <img src="/uploads/<?= sanitize($img['imagen']) ?>" alt="">
+            </button>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+        <?php elseif ($producto['imagen']): ?>
         <img src="/uploads/<?= sanitize($producto['imagen']) ?>" alt="<?= sanitize($producto['nombre']) ?>" class="producto-detalle-img">
         <?php else: ?>
         <div class="producto-detalle-img-placeholder"></div>
@@ -66,6 +82,19 @@
         <?php endif; ?>
     </div>
 </div>
+
+<?php if (!empty($imagenes) && count($imagenes) > 1): ?>
+<script>
+function cambiarImagenGaleria(thumb, src) {
+    document.getElementById('galeria-img-principal').src = src;
+    var thumbs = document.querySelectorAll('.galeria-thumb');
+    for (var i = 0; i < thumbs.length; i++) {
+        thumbs[i].classList.remove('active');
+    }
+    thumb.classList.add('active');
+}
+</script>
+<?php endif; ?>
 
 <?php if (!empty($relacionados)): ?>
 <div class="productos-relacionados">

@@ -2,6 +2,7 @@
 
 require_once BASE_PATH . '/modulos/catalogo/models/Producto.php';
 require_once BASE_PATH . '/modulos/catalogo/models/Categoria.php';
+require_once BASE_PATH . '/modulos/catalogo/models/ProductoImagen.php';
 
 class CatalogoPublicoController {
 
@@ -59,11 +60,14 @@ class CatalogoPublicoController {
             $producto['id']
         );
 
+        $imagenes = (new ProductoImagen())->porProducto($producto['id']);
+
         $tienePedidos = tieneModulo($negocio['id'], 'pedidos');
 
         renderPublico('catalogo', 'publico/producto-detalle', [
             'negocio' => $negocio,
             'producto' => $producto,
+            'imagenes' => $imagenes,
             'relacionados' => $relacionados,
             'tienePedidos' => $tienePedidos,
         ]);

@@ -7,6 +7,7 @@ get('/panel/productos/editar/{id}', ['ProductoController', 'editar']);
 post('/panel/productos/actualizar/{id}', ['ProductoController', 'actualizar']);
 post('/panel/productos/eliminar/{id}', ['ProductoController', 'eliminar']);
 post('/panel/productos/disponibilidad/{id}', ['ProductoController', 'toggleDisponibilidad']);
+post('/panel/productos/eliminar-imagen/{id}', ['ProductoController', 'eliminarImagen']);
 
 get('/panel/categorias', ['CategoriaController', 'index']);
 post('/panel/categorias/guardar', ['CategoriaController', 'guardar']);

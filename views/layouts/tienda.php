@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= sanitize($negocio['nombre'] ?? 'Tienda') ?></title>
     <meta name="csrf-token" content="<?= csrf() ?>">
-    <link rel="stylesheet" href="/assets/css/style.css?v=3">
+    <link rel="stylesheet" href="/assets/css/style.css?v=4">
 </head>
 <body class="tienda-body">
     <header class="tienda-header">
@@ -30,6 +30,6 @@
         <p>Creado con <?= sanitize(APP_NAME) ?></p>
     </footer>
 
-    <script src="/assets/js/app.js?v=3"></script>
+    <script src="/assets/js/app.js?v=4"></script>
 </body>
 </html>
